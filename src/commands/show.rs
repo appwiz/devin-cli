@@ -33,7 +33,7 @@ pub fn mask_token(token: &str) -> String {
 mod tests {
     use super::*;
     use std::env;
-    use tempfile::tempdir;
+    // Removed unused import
     
     #[test]
     fn test_mask_token() {

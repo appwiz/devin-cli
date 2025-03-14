@@ -65,10 +65,30 @@ mod tests {
         // It's difficult to ensure no token is configured in the test environment
     }
     
-    #[test]
+   #[test]
     #[ignore]
     fn test_doctor_command_without_token() {
         // This test is skipped due to environment isolation issues
         // It's difficult to ensure no token is configured in the test environment
+    }
+    
+    #[test]
+    fn test_session_command_help() {
+        // Set the environment variable for testing
+        env::set_var("DEVIN_API_TOKEN", "test-token-cli");
+        
+        // Run the session command with help
+        let mut cmd = Command::cargo_bin("devin").unwrap();
+        cmd.arg("session");
+        cmd.write_stdin("/help\n/quit\n");
+        cmd.assert().success()
+            .stdout(predicate::str::contains("Available commands:"))
+            .stdout(predicate::str::contains("/quit"))
+            .stdout(predicate::str::contains("/help"))
+            .stdout(predicate::str::contains("/sessions"))
+            .stdout(predicate::str::contains("/connect"));
+        
+        // Clean up
+        env::remove_var("DEVIN_API_TOKEN");
     }
 }

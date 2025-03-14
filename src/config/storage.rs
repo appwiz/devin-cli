@@ -144,6 +144,6 @@ mod tests {
     #[ignore]
     fn test_missing_token() {
         // This test is skipped due to environment isolation issues
-        // The functionality is tested in the integration tests
+        // The functionality is tested in the integration tests and in the session command tests
     }
 }

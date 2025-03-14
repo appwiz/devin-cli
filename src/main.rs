@@ -25,6 +25,13 @@ enum Commands {
     
     /// Check if the CLI is set up correctly
     Doctor,
+    
+    /// Start an interactive session with Devin
+    Session {
+        /// Optional session ID to connect to an existing session
+        #[arg(short, long)]
+        session_id: Option<String>,
+    },
 }
 
 fn main() -> Result<()> {
@@ -40,9 +47,12 @@ fn main() -> Result<()> {
         Some(Commands::Doctor) => {
             commands::doctor::execute()
         }
+        Some(Commands::Session { session_id }) => {
+            commands::session::execute(session_id.as_deref())
+        }
         None => {
-            println!("No command specified. Use --help for usage information.");
-            Ok(())
+            // If no command is specified, start an interactive session
+            commands::session::execute(None)
         }
     }
 }

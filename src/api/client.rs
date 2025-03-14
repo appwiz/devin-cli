@@ -1,5 +1,7 @@
 use reqwest::blocking::Client;
+use reqwest::header::{AUTHORIZATION, CONTENT_TYPE};
 use thiserror::Error;
+use crate::api::models::*;
 
 #[derive(Error, Debug)]
 pub enum ApiError {
@@ -8,6 +10,9 @@ pub enum ApiError {
     
     #[error("API request failed: {0}")]
     RequestError(String),
+    
+    #[error("Failed to parse API response: {0}")]
+    ParseError(String),
 }
 
 /// Client for interacting with the Devin API
@@ -54,6 +59,7 @@ impl ApiClient {
         Ok(())
     }
     
+    #[cfg(test)]
     /// Make a request to the API
     pub fn make_request(&self, endpoint: &str) -> Result<String, ApiError> {
         // This is a stub implementation to demonstrate how the client would be used
@@ -70,11 +76,13 @@ impl ApiClient {
         Ok(format!("Response from {}{}", self.api_url, endpoint))
     }
     
+    #[cfg(test)]
     /// Get the API URL
     pub fn get_api_url(&self) -> &str {
         &self.api_url
     }
     
+    #[cfg(test)]
     /// Get the API token (masked)
     pub fn get_masked_token(&self) -> String {
         if self.api_token.len() <= 8 {
@@ -85,6 +93,92 @@ impl ApiClient {
         let first = &self.api_token[..visible_chars];
         let last = &self.api_token[self.api_token.len() - visible_chars..];
         format!("{}...{}", first, last)
+    }
+    
+    /// Create a new session with an initial message
+    pub fn create_session(&self, message: &str) -> Result<String, ApiError> {
+        let url = format!("{}/v1/sessions", self.api_url);
+        let request = CreateSessionRequest {
+            prompt: message.to_string(),
+        };
+        
+        let response = self.client.post(&url)
+            .header(AUTHORIZATION, format!("Bearer {}", self.api_token))
+            .header(CONTENT_TYPE, "application/json")
+            .json(&request)
+            .send()
+            .map_err(|e| ApiError::ConnectionError(e.to_string()))?;
+        
+        if !response.status().is_success() {
+            return Err(ApiError::RequestError(format!("API returned status: {}", response.status())));
+        }
+        
+        let response_data: CreateSessionResponse = response.json()
+            .map_err(|e| ApiError::ParseError(e.to_string()))?;
+        
+        Ok(response_data.session_id)
+    }
+    
+    /// Send a message to an existing session
+    pub fn send_message(&self, session_id: &str, message: &str) -> Result<MessageResponse, ApiError> {
+        let url = format!("{}/v1/sessions/{}/messages", self.api_url, session_id);
+        let request = SendMessageRequest {
+            message: message.to_string(),
+        };
+        
+        let response = self.client.post(&url)
+            .header(AUTHORIZATION, format!("Bearer {}", self.api_token))
+            .header(CONTENT_TYPE, "application/json")
+            .json(&request)
+            .send()
+            .map_err(|e| ApiError::ConnectionError(e.to_string()))?;
+        
+        if !response.status().is_success() {
+            return Err(ApiError::RequestError(format!("API returned status: {}", response.status())));
+        }
+        
+        let response_data: MessageResponse = response.json()
+            .map_err(|e| ApiError::ParseError(e.to_string()))?;
+        
+        Ok(response_data)
+    }
+    
+    /// List all sessions
+    pub fn list_sessions(&self) -> Result<Vec<SessionDetails>, ApiError> {
+        let url = format!("{}/v1/sessions", self.api_url);
+        
+        let response = self.client.get(&url)
+            .header(AUTHORIZATION, format!("Bearer {}", self.api_token))
+            .send()
+            .map_err(|e| ApiError::ConnectionError(e.to_string()))?;
+        
+        if !response.status().is_success() {
+            return Err(ApiError::RequestError(format!("API returned status: {}", response.status())));
+        }
+        
+        let response_data: ListSessionsResponse = response.json()
+            .map_err(|e| ApiError::ParseError(e.to_string()))?;
+        
+        Ok(response_data.sessions)
+    }
+    
+    /// Get details for a specific session
+    pub fn get_session_details(&self, session_id: &str) -> Result<SessionDetails, ApiError> {
+        let url = format!("{}/v1/sessions/{}", self.api_url, session_id);
+        
+        let response = self.client.get(&url)
+            .header(AUTHORIZATION, format!("Bearer {}", self.api_token))
+            .send()
+            .map_err(|e| ApiError::ConnectionError(e.to_string()))?;
+        
+        if !response.status().is_success() {
+            return Err(ApiError::RequestError(format!("API returned status: {}", response.status())));
+        }
+        
+        let response_data: SessionDetails = response.json()
+            .map_err(|e| ApiError::ParseError(e.to_string()))?;
+        
+        Ok(response_data)
     }
 }
 

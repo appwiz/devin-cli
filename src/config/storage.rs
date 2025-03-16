@@ -21,8 +21,15 @@ impl Default for Config {
 
 /// Get the API token from environment variable or config file
 pub fn get_api_token() -> Result<String> {
-    // First check environment variable
+    // First check environment variable (DEVIN_API_TOKEN)
     if let Ok(token) = env::var(ENV_VAR_NAME) {
+        if !token.is_empty() {
+            return Ok(token);
+        }
+    }
+    
+    // Also check alternative environment variable (DEVIN_API_KEY)
+    if let Ok(token) = env::var("DEVIN_API_KEY") {
         if !token.is_empty() {
             return Ok(token);
         }

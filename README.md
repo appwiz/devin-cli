@@ -24,7 +24,7 @@ Before using the CLI, you need to configure your API token:
 devin configure <your-api-token>
 ```
 
-You can also set the token using the `DEVIN_API_TOKEN` environment variable.
+You can also set the token using the `DEVIN_API_TOKEN` or `DEVIN_API_KEY` environment variable.
 
 ## Usage
 

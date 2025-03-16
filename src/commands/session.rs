@@ -120,7 +120,7 @@ pub fn execute(session_id: Option<&str>) -> Result<()> {
                             }
                         },
                         CMD_SESSIONS => {
-                            match api_client.list_sessions() {
+                            match api_client.list_sessions(Some(100)) {
                                 Ok(sessions) => {
                                     if sessions.is_empty() {
                                         println!("No sessions found.");

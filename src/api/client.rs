@@ -144,11 +144,13 @@ impl ApiClient {
     }
     
     /// List all sessions
-    pub fn list_sessions(&self) -> Result<Vec<SessionDetails>, ApiError> {
-        let url = format!("{}/v1/sessions", self.api_url);
+    pub fn list_sessions(&self, limit: Option<u32>) -> Result<Vec<SessionDetails>, ApiError> {
+        let limit = limit.unwrap_or(100);
+        let url = format!("{}/v1/sessions?limit={}", self.api_url, limit);
         
         let response = self.client.get(&url)
             .header(AUTHORIZATION, format!("Bearer {}", self.api_token))
+            .header(CONTENT_TYPE, "application/json")
             .send()
             .map_err(|e| ApiError::ConnectionError(e.to_string()))?;
         

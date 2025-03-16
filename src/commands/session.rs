@@ -116,6 +116,10 @@ pub fn execute(session_id: Option<&str>) -> Result<()> {
                                 },
                                 Err(e) => {
                                     println!("{} {}", "✗ Failed to connect to session:".red(), e);
+                                    if e.to_string().contains("401") || e.to_string().contains("403") {
+                                        println!("\nPlease check your API token is valid and has the correct permissions.");
+                                        println!("You can configure your token with 'devin configure <token>'");
+                                    }
                                 }
                             }
                         },
@@ -133,6 +137,10 @@ pub fn execute(session_id: Option<&str>) -> Result<()> {
                                 },
                                 Err(e) => {
                                     println!("{} {}", "✗ Failed to list sessions:".red(), e);
+                                    if e.to_string().contains("401") || e.to_string().contains("403") {
+                                        println!("\nPlease check your API token is valid and has the correct permissions.");
+                                        println!("You can configure your token with 'devin configure <token>'");
+                                    }
                                 }
                             }
                         },
@@ -158,11 +166,19 @@ pub fn execute(session_id: Option<&str>) -> Result<()> {
                                 },
                                 Err(e) => {
                                     println!("{} {}", "✗ Failed to get response:".red(), e);
+                                    if e.to_string().contains("401") || e.to_string().contains("403") {
+                                        println!("\nPlease check your API token is valid and has the correct permissions.");
+                                        println!("You can configure your token with 'devin configure <token>'");
+                                    }
                                 }
                             }
                         },
                         Err(e) => {
                             println!("{} {}", "✗ Failed to create session:".red(), e);
+                            if e.to_string().contains("401") || e.to_string().contains("403") {
+                                println!("\nPlease check your API token is valid and has the correct permissions.");
+                                println!("You can configure your token with 'devin configure <token>'");
+                            }
                         }
                     }
                 } else {
@@ -173,6 +189,10 @@ pub fn execute(session_id: Option<&str>) -> Result<()> {
                         },
                         Err(e) => {
                             println!("{} {}", "✗ Failed to send message:".red(), e);
+                            if e.to_string().contains("401") || e.to_string().contains("403") {
+                                println!("\nPlease check your API token is valid and has the correct permissions.");
+                                println!("You can configure your token with 'devin configure <token>'");
+                            }
                         }
                     }
                 }

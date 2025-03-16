@@ -110,7 +110,9 @@ impl ApiClient {
             .map_err(|e| ApiError::ConnectionError(e.to_string()))?;
         
         if !response.status().is_success() {
-            return Err(ApiError::RequestError(format!("API returned status: {}", response.status())));
+            let status = response.status();
+            let error_body = response.text().unwrap_or_default();
+            return Err(ApiError::RequestError(format!("API returned status: {} - {}", status, error_body)));
         }
         
         let response_data: CreateSessionResponse = response.json()
@@ -134,7 +136,9 @@ impl ApiClient {
             .map_err(|e| ApiError::ConnectionError(e.to_string()))?;
         
         if !response.status().is_success() {
-            return Err(ApiError::RequestError(format!("API returned status: {}", response.status())));
+            let status = response.status();
+            let error_body = response.text().unwrap_or_default();
+            return Err(ApiError::RequestError(format!("API returned status: {} - {}", status, error_body)));
         }
         
         let response_data: MessageResponse = response.json()
@@ -155,7 +159,9 @@ impl ApiClient {
             .map_err(|e| ApiError::ConnectionError(e.to_string()))?;
         
         if !response.status().is_success() {
-            return Err(ApiError::RequestError(format!("API returned status: {}", response.status())));
+            let status = response.status();
+            let error_body = response.text().unwrap_or_default();
+            return Err(ApiError::RequestError(format!("API returned status: {} - {}", status, error_body)));
         }
         
         let response_data: ListSessionsResponse = response.json()
@@ -170,11 +176,14 @@ impl ApiClient {
         
         let response = self.client.get(&url)
             .header(AUTHORIZATION, format!("Bearer {}", self.api_token))
+            .header(CONTENT_TYPE, "application/json")
             .send()
             .map_err(|e| ApiError::ConnectionError(e.to_string()))?;
         
         if !response.status().is_success() {
-            return Err(ApiError::RequestError(format!("API returned status: {}", response.status())));
+            let status = response.status();
+            let error_body = response.text().unwrap_or_default();
+            return Err(ApiError::RequestError(format!("API returned status: {} - {}", status, error_body)));
         }
         
         let response_data: SessionDetails = response.json()
